@@ -1,6 +1,5 @@
 {
   "scripts": {
-    "build": "echo 'No build step in root'",
     "test": "npm --prefix cdk test"
   },
   "devDependencies": {
