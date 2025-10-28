@@ -138,6 +138,13 @@ export class CDKQuantStack extends Stack {
       description: 'Port on which the Node.js container listens',
     });
 
+    // CloudFormation parameter for the ECS cluster name
+    const clusterNameParam = new CfnParameter(this, 'ClusterName', {
+      type: 'String',
+      default: 'QuantServerCluster',
+      description: 'Name of the ECS Cluster',
+    });
+
     const vpc = new ec2.Vpc(this, 'ServerVpc', {
       maxAzs: 2,
     });
@@ -145,7 +152,7 @@ export class CDKQuantStack extends Stack {
     // 6. ECS Cluster
     const cluster = new ecs.Cluster(this, 'ServerCluster', {
       vpc,
-      clusterName: 'QuantServerCluster',
+      clusterName: clusterNameParam.valueAsString,
     });
 
     // 7. Fargate Service + Load Balancer
@@ -161,6 +168,7 @@ export class CDKQuantStack extends Stack {
         containerPort: portParam.valueAsNumber as unknown as number,
         environment: {
           PORT: portParam.valueAsString,
+          CLUSTER_NAME: clusterNameParam.valueAsString,
         },
       },
       memoryLimitMiB: 512,
@@ -178,11 +186,15 @@ export class CDKQuantStack extends Stack {
       description: 'URL of the Node.js server (Fargate behind ALB)',
     });
 
-    // Export the port used by the container so it's visible in stack outputs
+    // Export the port and cluster name used by the container so they're visible in stack outputs
     // and can be inspected after deployment.
     new CfnOutput(this, 'PortOutput', {
       value: portParam.valueAsString,
       description: 'Port the Node.js container listens on',
+    });
+    new CfnOutput(this, 'ClusterNameOutput', {
+      value: clusterNameParam.valueAsString,
+      description: 'Name of the ECS Cluster',
     });
   }
 }

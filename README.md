@@ -74,6 +74,12 @@
 	cd cdk
 	cdk deploy
 	```
+	>CDK Deploy supports three custom parameters "StackName", "ClusterName" and "Port", with this you can easily reproduce solution.
+
+	```
+	Example:
+	cdk deploy -c stackName=CDKTestStack --parameters CDKTestStack:Port=3000 --parameters CDKTestStack:ClusterName=TestCluster
+	```
 
 3. After deployment, note the output URLs for the static website, API, and backend server.
 
@@ -224,6 +230,7 @@ Comprehensive automated testing is implemented for both infrastructure and appli
 All tests are run locally as part of the development workflow and can be integrated into CI/CD pipelines for automated validation.
 
 This architecture provides a scalable, maintainable, and testable foundation for cloud-native applications.
+
 ## Technology Stack Analysis
 
 ### Architectural Rationale
