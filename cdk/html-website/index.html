@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple HTML Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; background: #f9f9f9; }
+        h1 { color: #333; }
+        p { color: #555; }
+    </style>
+</head>
+<body>
+        <h1>Quant Website</h1>
+        <p>Hello worl...OP Market analytics</p>
+        <button id="apiButton">Call API</button>
+        <pre id="apiResult" style="margin-top:1em; background:#eee; padding:1em;"></pre>
+        <script>
+            document.getElementById('apiButton').onclick = async function() {
+                const resultElem = document.getElementById('apiResult');
+                resultElem.textContent = 'Calling API...';
+                try {
+                    const response = await fetch('https://ic3anaftmc.execute-api.eu-north-1.amazonaws.com/prod/hello');
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const data = await response.json();
+                    // Show only the message property if present
+                    if (data && data.message) {
+                        resultElem.textContent = data.message;
+                    } else {
+                        resultElem.textContent = JSON.stringify(data, null, 2);
+                    }
+                } catch (err) {
+                    resultElem.textContent = 'Error: ' + err;
+                }
+            };
+        </script>
+</body>
+</html>
