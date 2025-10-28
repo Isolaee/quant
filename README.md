@@ -14,23 +14,38 @@
 
 
 1. **Install AWS CLI:**
-	- Follow the official guide: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-	- On Linux (x86_64):
+
+	**Either**
+
+	Follow the official guide: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+	
+	**Or**
+
+	On Linux (x86_64) development machine run:
 	  ```bash
 	  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 	  unzip awscliv2.zip
 	  sudo ./aws/install
+	  ```
+
+	Execute command to verify the installation.
+	  ```
 	  aws --version
 	  ```
-	- Configure your credentials:
+	>This should return AWS CLI version number
+
+	Configure your credentials:
 	  ```bash
 	  aws configure
 	  ```
 
 2. **Install AWS CDK (v2):**
-	- Install globally using npm:
+	Install globally using npm:
 	  ```bash
 	  npm install -g aws-cdk@2
+	  ```
+	Execute command to verify the installation.
+	  ```
 	  cdk --version
 	  ```
 
@@ -75,16 +90,14 @@ To remove all AWS resources created by this project, run the following commands:
 	```
 3. Confirm the destruction when prompted. This will delete all infrastructure provisioned by the CDK stack.
 
+## Environment Variables
 
-## Requirements Checklist
+This project may require the following environment variables for deployment or local development:
 
-- ✅ Simple web application
-- ✅ Separate front end and back end
-- ✅ At least one HTTP request from front end to back end
-- ✅ Containerization (Docker) of the back end (optional, implemented)
-- ✅ Cloud deployed
-- ✅ Infrastructure as code
-- ✅ Idempotent deployments
+- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: AWS credentials for deployment (set via `aws configure` or environment variables)
+- `AWS_DEFAULT_REGION`: AWS region for resource deployment (e.g., `eu-north-1`)
+
+Ensure these are set in your shell or CI/CD environment as appropriate.
 
 ## File Structure
 
@@ -121,6 +134,17 @@ quant/
 
 This project demonstrates a modern cloud-native architecture using AWS services and best practices for infrastructure as code, containerization, and automated testing.
 
+## Requirements Checklist
+>Project has the following requested features.
+- ✅ Simple web application
+- ✅ Separate front end and back end
+- ✅ At least one HTTP request from front end to back end
+- ✅ Containerization (Docker) of the back end (optional, implemented)
+- ✅ Cloud deployed
+- ✅ Infrastructure as code
+- ✅ Idempotent deployments
+
+
 ### Technology Stack
 
 - **AWS CDK (TypeScript):** Infrastructure as code for provisioning AWS resources
@@ -132,28 +156,26 @@ This project demonstrates a modern cloud-native architecture using AWS services 
 - **Jest:** Unit testing for both infrastructure and application code
 
 
-## Implementation Details
+## Architecture Overview
 
-### Architecture Overview
-
-#### Frontend
+### Frontend
 - **Static Website**: Hosted on Amazon S3, serving assets from the `html-website/` directory
 - **Website Delivery**: S3 bucket is configured for static website hosting with public read access, custom index, and error documents
 - **Deployment**: Static assets are deployed to S3 using `BucketDeployment` via AWS CDK
 
-#### Backend
+### Backend
 - **API Gateway**: Exposes a `/hello` resource with GET and OPTIONS methods, CORS support, and a mock integration for GET requests
 - **Node.js Application Server**: Runs in a Docker container on Amazon ECS (Fargate), managed by an Application Load Balancer
 - **Networking**: ECS services are deployed within a VPC (maxAzs=2) for isolation and scalability
 - **Health Checks**: Load balancer performs health checks on `/api/hello` endpoint
 - **CloudFormation Outputs**: Provide API URL, website URL, and Node.js server URL for easy access
 
-### Application Server
+### Implementation Details
 
 - Express server in `server/index.js` exposes a `/api/hello` endpoint returning a JSON message
 - Unit tests (`server/index.test.js`) validate endpoint responses using Supertest and Jest
 
-### Testing
+## Testing
 
 Comprehensive automated testing is implemented for both infrastructure and application code to ensure reliability and maintainability:
 
@@ -183,14 +205,14 @@ Comprehensive automated testing is implemented for both infrastructure and appli
 
 All tests are run locally as part of the development workflow and can be integrated into CI/CD pipelines for automated validation.
 
-## Architectural Rationale
+This architecture provides a scalable, maintainable, and testable foundation for cloud-native applications.
+## Technology Stack Analysis
+
+### Architectural Rationale
 
 - **AWS** was selected for its robust cloud ecosystem and comprehensive tooling
 - **AWS CDK** streamlines infrastructure as code, enabling repeatable and version-controlled deployments
 - **Node.js/Express** is an industry-standard choice for lightweight, scalable API services
-
-This architecture provides a scalable, maintainable, and testable foundation for cloud-native applications.
-## Technology Stack Analysis
 
 This project leverages a modern cloud-native stack. Below is an analysis of the main technologies used, including their advantages and potential drawbacks:
 
@@ -200,6 +222,7 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Enables version control and repeatable deployments
 - Integrates seamlessly with AWS services
 - Supports testing and validation of infrastructure
+
 **Downsides:**
 - Steeper learning curve compared to declarative IaC (e.g., CloudFormation YAML)
 - Tightly coupled to AWS ecosystem
@@ -240,6 +263,7 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Lightweight, fast, and widely adopted for APIs
 - Large ecosystem of middleware and libraries
 - Easy to containerize and deploy
+
 **Downsides:**
 - Single-threaded by default (may require clustering for CPU-bound tasks)
 - Callback-based async can be error-prone if not managed well
@@ -249,6 +273,7 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Comprehensive testing for both infrastructure and application
 - Fast, easy-to-use, and widely supported
 - Enables TDD and CI/CD integration
+
 **Downsides:**
 - May require additional setup for integration or end-to-end tests
 - Mocking AWS resources can be complex
@@ -258,20 +283,13 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Consistent environment across development, testing, and production
 - Simplifies deployment and scaling
 - Supported by most cloud providers
+
 **Downsides:**
 - Adds complexity to local development if not familiar with containers
 - Requires understanding of container security and best practices
 
 Overall, this stack provides a robust, scalable, and maintainable foundation for cloud-native applications, with trade-offs primarily around complexity and AWS lock-in.
 
-## Environment Variables
-
-This project may require the following environment variables for deployment or local development:
-
-- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: AWS credentials for deployment (set via `aws configure` or environment variables)
-- `AWS_DEFAULT_REGION`: AWS region for resource deployment (e.g., `eu-north-1`)
-
-Ensure these are set in your shell or CI/CD environment as appropriate.
 
 ## Known Issues or Limitations
 

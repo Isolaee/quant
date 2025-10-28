@@ -3,16 +3,21 @@ node_modules/
 npm-debug.log
 yarn-debug.log
 yarn-error.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
+
 
 # CDK
 cdk.out/
 cdk.context.json
 
-# Server build artifacts
-/server/node_modules/
-/server/npm-debug.log
-/server/yarn-debug.log
-/server/yarn-error.log
+# Server build artifacts/server/node_modules/
+server/node_modules/
+server/npm-debug.log
+server/yarn-debug.log
+server/yarn-error.log
 
 # OS
 .DS_Store

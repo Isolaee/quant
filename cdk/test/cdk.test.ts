@@ -26,7 +26,6 @@ describe('CDKQuantStack', () => {
 					IgnorePublicAcls: false,
 					RestrictPublicBuckets: false,
 				},
-				// AccessControl is not set in the template, so we do not check it
 			});
 			template.resourceCountIs('AWS::S3::Bucket', 1);
 	});
