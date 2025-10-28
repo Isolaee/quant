@@ -208,6 +208,7 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Highly available and cost-effective static hosting
 - Simple deployment and scaling
 - Integrates with CloudFront for CDN
+
 **Downsides:**
 - Limited to static content (no server-side logic)
 - Public access configuration can be error-prone
@@ -217,6 +218,7 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Fully managed, scalable API endpoint
 - Built-in support for CORS, throttling, and security
 - Easy integration with AWS Lambda or mock integrations
+
 **Downsides:**
 - Can be complex to configure for advanced use cases
 - Pricing can increase with high request volumes
