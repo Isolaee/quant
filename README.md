@@ -230,6 +230,7 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Serverless container orchestration (no server management)
 - Integrates with VPC, Load Balancer, and IAM
 - Scales automatically with demand
+
 **Downsides:**
 - Cold start latency for infrequently used services
 - Debugging and troubleshooting can be more complex than traditional servers
@@ -262,3 +263,6 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Requires understanding of container security and best practices
 
 Overall, this stack provides a robust, scalable, and maintainable foundation for cloud-native applications, with trade-offs primarily around complexity and AWS lock-in.
+
+### Use of AI-tools
+During the completion of this assignment, I utilized GitHub Copilot as an assistive tool for coding, information retrieval, and README formatting. All solutions and decisions presented are my own and remain my sole responsibility.
