@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cdk
 
     steps:
     - uses: actions/checkout@v4
@@ -17,8 +20,6 @@ jobs:
       with:
         node-version: '20.x'
     - name: Install dependencies (cdk)
-      working-directory: cdk
       run: npm ci
     - name: Run tests (cdk)
-      working-directory: cdk
       run: npm test
