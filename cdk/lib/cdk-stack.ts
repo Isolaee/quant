@@ -13,7 +13,7 @@ export class CDKQuantStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // 1. Create an S3 bucket for static files (not public, no website hosting)
+    // 1. Create an S3 bucket for static files
     const siteBucket = new s3.Bucket(this, 'SiteBucket', {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
@@ -30,7 +30,7 @@ export class CDKQuantStack extends Stack {
     new CfnOutput(this, 'Bucket', { value: siteBucket.bucketName });
     new CfnOutput(this, 'WebsiteURL', { value: siteBucket.bucketWebsiteUrl });
 
-    // 2. Deploy static files to S3 (optional, for static assets)
+    // 2. Deploy static files to S3
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3deploy.Source.asset('html-website')],
       destinationBucket: siteBucket,
