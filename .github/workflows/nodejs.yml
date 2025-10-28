@@ -19,6 +19,19 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
+    - name: Debug workspace
+      # run from the repo workspace root so we can see what's actually checked out
+      working-directory: ${{ github.workspace }}
+      run: |
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+        pwd
+        ls -la "$GITHUB_WORKSPACE"
+        echo '--- cdk dir ---'
+        ls -la "$GITHUB_WORKSPACE/cdk" || true
+        echo '--- cdk/html-website ---'
+        ls -la "$GITHUB_WORKSPACE/cdk/html-website" || true
+        echo '--- root package.json ---'
+        cat "$GITHUB_WORKSPACE/package.json" || true
     - name: Install dependencies (cdk)
       run: npm ci
     - name: Run tests (cdk)
