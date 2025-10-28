@@ -74,7 +74,25 @@
 	cd cdk
 	cdk deploy
 	```
+
 3. After deployment, note the output URLs for the static website, API, and backend server.
+
+## Usage
+
+Website locations are shown in cdk deploy outputs
+
+```
+Outputs:
+[StackName].ApiUrl = https://[URL]
+[StackName].Bucket = [BucketName]
+[StackName].DefaultApiEndpointB0E75779 = https://[URL]
+[StackName].NodeFargateServiceLoadBalancerDNS3BD08BD7 = [LoadBalancer]
+[StackName].NodeFargateServiceServiceURLE6F1CAA2 = http://[URL]
+[StackName].NodeServerUrl = http://[URL]
+[StackName].WebsiteURL = http://[URL]
+```
+
+To view the frontend, open the `WebsiteURL` output in your browser. To call the API, use the `ApiUrl` output or the load balancer / server URLs as appropriate.
 
 ## Destruction
 
@@ -90,14 +108,14 @@ To remove all AWS resources created by this project, run the following commands:
 	```
 3. Confirm the destruction when prompted. This will delete all infrastructure provisioned by the CDK stack.
 
-## Environment Variables
+## Environment variables
 
-This project may require the following environment variables for deployment or local development:
+This project uses (or may require) the following environment variables for deployment or local development:
 
-- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: AWS credentials for deployment (set via `aws configure` or environment variables)
-- `AWS_DEFAULT_REGION`: AWS region for resource deployment (e.g., `eu-north-1`)
+- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` — AWS credentials (can be set via `aws configure` or environment variables)
+- `AWS_DEFAULT_REGION` — AWS region for resource deployment (e.g., `eu-north-1`)
 
-Ensure these are set in your shell or CI/CD environment as appropriate.
+Make sure these are set in your shell or CI/CD environment as needed.
 
 ## File Structure
 
@@ -129,23 +147,23 @@ quant/
 │   └── package.json
 ```
 
-
-## Solution Overview
+## Solution overview
 
 This project demonstrates a modern cloud-native architecture using AWS services and best practices for infrastructure as code, containerization, and automated testing.
 
-## Requirements Checklist
->Project has the following requested features.
+## Requirements checklist
+
+The project implements the requested features:
+
 - ✅ Simple web application
 - ✅ Separate front end and back end
 - ✅ At least one HTTP request from front end to back end
-- ✅ Containerization (Docker) of the back end (optional, implemented)
+- ✅ Containerization (Docker) of the back end
 - ✅ Cloud deployed
 - ✅ Infrastructure as code
 - ✅ Idempotent deployments
 
-
-### Technology Stack
+## Technology stack
 
 - **AWS CDK (TypeScript):** Infrastructure as code for provisioning AWS resources
 - **Amazon S3:** Static website hosting and asset storage
