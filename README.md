@@ -10,12 +10,35 @@
 
 ## Installation
 
-1. Clone the repository:
+
+1. **Install AWS CLI:**
+	- Follow the official guide: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+	- On Linux (x86_64):
+	  ```bash
+	  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+	  unzip awscliv2.zip
+	  sudo ./aws/install
+	  aws --version
+	  ```
+	- Configure your credentials:
+	  ```bash
+	  aws configure
+	  ```
+
+2. **Install AWS CDK (v2):**
+	- Install globally using npm:
+	  ```bash
+	  npm install -g aws-cdk@2
+	  cdk --version
+	  ```
+
+3. **Clone the repository:**
 	```bash
 	git clone <repo-url>
 	cd quant
 	```
-2. Install dependencies for both the root and subprojects:
+
+4. **Install dependencies for both the root and subprojects:**
 	```bash
 	npm install
 	cd cdk && npm install
@@ -165,3 +188,73 @@ All tests are run locally as part of the development workflow and can be integra
 - **Node.js/Express** is an industry-standard choice for lightweight, scalable API services
 
 This architecture provides a scalable, maintainable, and testable foundation for cloud-native applications.
+## Technology Stack Analysis
+
+This project leverages a modern cloud-native stack. Below is an analysis of the main technologies used, including their advantages and potential drawbacks:
+
+### AWS CDK (TypeScript)
+**Upsides:**
+- Strongly-typed, code-driven infrastructure as code (IaC)
+- Enables version control and repeatable deployments
+- Integrates seamlessly with AWS services
+- Supports testing and validation of infrastructure
+**Downsides:**
+- Steeper learning curve compared to declarative IaC (e.g., CloudFormation YAML)
+- Tightly coupled to AWS ecosystem
+- Occasional breaking changes between CDK versions
+
+### Amazon S3 (Static Website Hosting)
+**Upsides:**
+- Highly available and cost-effective static hosting
+- Simple deployment and scaling
+- Integrates with CloudFront for CDN
+**Downsides:**
+- Limited to static content (no server-side logic)
+- Public access configuration can be error-prone
+
+### Amazon API Gateway
+**Upsides:**
+- Fully managed, scalable API endpoint
+- Built-in support for CORS, throttling, and security
+- Easy integration with AWS Lambda or mock integrations
+**Downsides:**
+- Can be complex to configure for advanced use cases
+- Pricing can increase with high request volumes
+
+### Amazon ECS (Fargate)
+**Upsides:**
+- Serverless container orchestration (no server management)
+- Integrates with VPC, Load Balancer, and IAM
+- Scales automatically with demand
+**Downsides:**
+- Cold start latency for infrequently used services
+- Debugging and troubleshooting can be more complex than traditional servers
+
+### Node.js (Express)
+**Upsides:**
+- Lightweight, fast, and widely adopted for APIs
+- Large ecosystem of middleware and libraries
+- Easy to containerize and deploy
+**Downsides:**
+- Single-threaded by default (may require clustering for CPU-bound tasks)
+- Callback-based async can be error-prone if not managed well
+
+### Jest & Supertest
+**Upsides:**
+- Comprehensive testing for both infrastructure and application
+- Fast, easy-to-use, and widely supported
+- Enables TDD and CI/CD integration
+**Downsides:**
+- May require additional setup for integration or end-to-end tests
+- Mocking AWS resources can be complex
+
+### Docker
+**Upsides:**
+- Consistent environment across development, testing, and production
+- Simplifies deployment and scaling
+- Supported by most cloud providers
+**Downsides:**
+- Adds complexity to local development if not familiar with containers
+- Requires understanding of container security and best practices
+
+Overall, this stack provides a robust, scalable, and maintainable foundation for cloud-native applications, with trade-offs primarily around complexity and AWS lock-in.
