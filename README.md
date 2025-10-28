@@ -6,7 +6,7 @@
 - [npm](https://www.npmjs.com/) (v9 or newer recommended, comes with Node.js)
 - [AWS CLI](https://aws.amazon.com/cli/) configured with appropriate credentials
 - [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) (v2)
-- [Docker](https://www.docker.com/) (optional, for backend containerization)
+- [Docker](https://www.docker.com/)
 
 ## Installation
 
@@ -263,6 +263,21 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Requires understanding of container security and best practices
 
 Overall, this stack provides a robust, scalable, and maintainable foundation for cloud-native applications, with trade-offs primarily around complexity and AWS lock-in.
+
+## Environment Variables
+
+This project may require the following environment variables for deployment or local development:
+
+- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: AWS credentials for deployment (set via `aws configure` or environment variables)
+- `AWS_DEFAULT_REGION`: AWS region for resource deployment (e.g., `eu-north-1`)
+
+Ensure these are set in your shell or CI/CD environment as appropriate.
+
+## Known Issues or Limitations
+
+- The project is tightly coupled to AWS services and may not be easily portable to other cloud providers.
+- Node.js version compatibility is required (v18.14.0 or newer).
+- Advanced API Gateway or ECS configurations may require further customization.
 
 ### Use of AI-tools
 During the completion of this assignment, I utilized GitHub Copilot as an assistive tool for coding, information retrieval, and README formatting. All solutions and decisions presented are my own and remain my sole responsibility.
