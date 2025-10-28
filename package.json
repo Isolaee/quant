@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "echo 'No build step in root'"
+    "build": "echo 'No build step in root'",
+    "test": "npm --prefix cdk test"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

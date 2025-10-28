@@ -17,10 +17,8 @@ jobs:
       with:
         node-version: '20.x'
     - name: Install dependencies (cdk)
-      run: |
-        cd cdk
-        npm install
+      working-directory: cdk
+      run: npm ci
     - name: Run tests (cdk)
-      run: |
-        cd cdk
-        npm test
+      working-directory: cdk
+      run: npm test
