@@ -2,13 +2,15 @@
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16 or newer recommended)
-- [npm](https://www.npmjs.com/) (comes with Node.js)
+- [Node.js](https://nodejs.org/) (v18.14.0 or newer required)
+- [npm](https://www.npmjs.com/) (v9 or newer recommended, comes with Node.js)
 - [AWS CLI](https://aws.amazon.com/cli/) configured with appropriate credentials
 - [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) (v2)
 - [Docker](https://www.docker.com/) (optional, for backend containerization)
 
 ## Installation
+
+> **Note:** This project requires Node.js v18.14.0 or newer and npm v9 or newer. Using older versions may result in dependency errors, especially with Jest and AWS CDK.
 
 
 1. **Install AWS CLI:**
