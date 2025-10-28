@@ -40,17 +40,17 @@ describe('CDKQuantStack', () => {
 			expect(hasCorrectBucket).toBe(true);
 	});
 
-//	it('creates an API Gateway with /hello resource and methods', () => {
-//		template.hasResourceProperties('AWS::ApiGateway::Resource', {
-//			PathPart: 'hello',
-//		});
-//		template.hasResourceProperties('AWS::ApiGateway::Method', {
-//			HttpMethod: 'GET',
-//		});
-//		template.hasResourceProperties('AWS::ApiGateway::Method', {
-//			HttpMethod: 'OPTIONS',
-//		});
-//	});
+	it('creates an API Gateway with /hello resource and methods', () => {
+		template.hasResourceProperties('AWS::ApiGateway::Resource', {
+			PathPart: 'hello',
+		});
+		template.hasResourceProperties('AWS::ApiGateway::Method', {
+			HttpMethod: 'GET',
+		});
+		template.hasResourceProperties('AWS::ApiGateway::Method', {
+			HttpMethod: 'OPTIONS',
+		});
+	});
 
 	it('has CORS settings in API Gateway method responses', () => {
 		const methods = template.findResources('AWS::ApiGateway::Method');
@@ -80,30 +80,6 @@ describe('CDKQuantStack', () => {
 		const subnets = template.findResources('AWS::EC2::Subnet');
 		expect(Object.keys(subnets).length).toBeGreaterThanOrEqual(2);
 	});
-
-	// it('creates an ECS Cluster and Fargate Service with correct config', () => {
-	// 		template.hasResourceProperties('AWS::ECS::Cluster', {
-	// 			ClusterName: 'QuantServerCluster',
-	// 		});
-	// 		// The synthesized template has ContainerDefinitions as an array, so we check for array presence and port mapping
-	// 		const taskDefs = template.findResources('AWS::ECS::TaskDefinition');
-	// 		const hasPort = Object.values(taskDefs).some((def: any) => {
-	// 			return def.Properties && Array.isArray(def.Properties.ContainerDefinitions) &&
-	// 				def.Properties.ContainerDefinitions.some((container: any) =>
-	// 					Array.isArray(container.PortMappings) &&
-	// 					container.PortMappings.some((pm: any) => pm.ContainerPort === 3000)
-	// 				);
-	// 		});
-	// 		expect(hasPort).toBe(true);
-	// 		template.hasResourceProperties('AWS::ECS::TaskDefinition', {
-	// 			Cpu: '256',
-	// 			Memory: '512',
-	// 		});
-	// 		template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
-	// 			HealthCheckPath: '/api/hello',
-	// 			Matcher: { HttpCode: '200' },
-	// 		});
-	// });
 
 	it('defines expected CloudFormation outputs', () => {
 				// Only check that the outputs exist by name
