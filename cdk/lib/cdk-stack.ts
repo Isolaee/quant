@@ -3,7 +3,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import { BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import { RemovalPolicy, Stack, StackProps, CfnOutput } from 'aws-cdk-lib';
+import { RemovalPolicy, Stack, StackProps, CfnOutput, CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
@@ -97,9 +97,7 @@ export class CDKQuantStack extends Stack {
 
     new CfnOutput(this, 'ApiUrl', { value: api.url ?? 'API URL not available' });
 
-    // Write a runtime config.json into the website bucket with the resolved API URL
-    // The AwsCustomResource will call S3.putObject during deployment with the
-    // CloudFormation-resolved `api.url` token so the static client can read it.
+  // Write the API URL to a config.json file in the S3 bucket
   const writeConfig = new cr.AwsCustomResource(this, 'WriteSiteConfig', {
       onCreate: {
         service: 'S3',
@@ -128,11 +126,18 @@ export class CDKQuantStack extends Stack {
       policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [siteBucket.bucketArn + '/*'] }),
     });
 
-    // Ensure the config file is written after the website files are deployed so
-    // it overwrites any placeholder in the deploy sources.
     writeConfig.node.addDependency(deploy);
 
     // 5. Create a VPC for ECS
+    // CloudFormation parameter for the container port. This allows passing
+    // `--parameters <Stack>:Port=XXXX` to `cdk deploy` and have the value
+    // appear in the generated template.
+    const portParam = new CfnParameter(this, 'Port', {
+      type: 'Number',
+      default: 3000,
+      description: 'Port on which the Node.js container listens',
+    });
+
     const vpc = new ec2.Vpc(this, 'ServerVpc', {
       maxAzs: 2,
     });
@@ -150,7 +155,13 @@ export class CDKQuantStack extends Stack {
       desiredCount: 1,
       taskImageOptions: {
         image: ecs.ContainerImage.fromAsset('../server'),
-        containerPort: 3000,
+        // Use the CloudFormation parameter value for container port. We
+        // pass it both to the container port mapping and as an environment
+        // variable so the app inside the container can read it at runtime.
+        containerPort: portParam.valueAsNumber as unknown as number,
+        environment: {
+          PORT: portParam.valueAsString,
+        },
       },
       memoryLimitMiB: 512,
       publicLoadBalancer: true,
@@ -165,6 +176,13 @@ export class CDKQuantStack extends Stack {
     new CfnOutput(this, 'NodeServerUrl', {
       value: `http://${fargateService.loadBalancer.loadBalancerDnsName}`,
       description: 'URL of the Node.js server (Fargate behind ALB)',
+    });
+
+    // Export the port used by the container so it's visible in stack outputs
+    // and can be inspected after deployment.
+    new CfnOutput(this, 'PortOutput', {
+      value: portParam.valueAsString,
+      description: 'Port the Node.js container listens on',
     });
   }
 }
