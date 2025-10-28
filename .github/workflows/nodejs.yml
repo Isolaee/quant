@@ -22,4 +22,4 @@ jobs:
     - name: Install dependencies (cdk)
       run: npm ci
     - name: Run tests (cdk)
-      run: npm test
+      run: npx jest --config jest.config.js --runInBand
