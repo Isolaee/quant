@@ -8,6 +8,7 @@ import { Construct } from 'constructs';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
+import * as cr from 'aws-cdk-lib/custom-resources';
 
 export class CDKQuantStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -31,7 +32,7 @@ export class CDKQuantStack extends Stack {
     new CfnOutput(this, 'WebsiteURL', { value: siteBucket.bucketWebsiteUrl });
 
     // 2. Deploy static files to S3
-    new s3deploy.BucketDeployment(this, 'DeployWebsite', {
+    const deploy = new s3deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3deploy.Source.asset('html-website')],
       destinationBucket: siteBucket,
     });
@@ -95,6 +96,41 @@ export class CDKQuantStack extends Stack {
     });
 
     new CfnOutput(this, 'ApiUrl', { value: api.url ?? 'API URL not available' });
+
+    // Write a runtime config.json into the website bucket with the resolved API URL
+    // The AwsCustomResource will call S3.putObject during deployment with the
+    // CloudFormation-resolved `api.url` token so the static client can read it.
+  const writeConfig = new cr.AwsCustomResource(this, 'WriteSiteConfig', {
+      onCreate: {
+        service: 'S3',
+        action: 'putObject',
+        parameters: {
+          Bucket: siteBucket.bucketName,
+          Key: 'config.json',
+          Body: JSON.stringify({ apiUrl: api.url }),
+          ContentType: 'application/json',
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        },
+        physicalResourceId: cr.PhysicalResourceId.of('site-config'),
+      },
+      onUpdate: {
+        service: 'S3',
+        action: 'putObject',
+        parameters: {
+          Bucket: siteBucket.bucketName,
+          Key: 'config.json',
+          Body: JSON.stringify({ apiUrl: api.url }),
+          ContentType: 'application/json',
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        },
+        physicalResourceId: cr.PhysicalResourceId.of('site-config'),
+      },
+      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [siteBucket.bucketArn + '/*'] }),
+    });
+
+    // Ensure the config file is written after the website files are deployed so
+    // it overwrites any placeholder in the deploy sources.
+    writeConfig.node.addDependency(deploy);
 
     // 5. Create a VPC for ECS
     const vpc = new ec2.Vpc(this, 'ServerVpc', {

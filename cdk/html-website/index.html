@@ -16,11 +16,25 @@
         <button id="apiButton">Call API</button>
         <pre id="apiResult" style="margin-top:1em; background:#eee; padding:1em;"></pre>
         <script>
+            async function getApiUrl() {
+                try {
+                    const resp = await fetch('/config.json', { cache: 'no-cache' });
+                    if (!resp.ok) throw new Error('Config fetch HTTP ' + resp.status);
+                    const cfg = await resp.json();
+                    if (!cfg || !cfg.apiUrl) throw new Error('config.json missing apiUrl');
+                    return cfg.apiUrl.replace(/\/+$/, '');
+                } catch (err) {
+                    console.error('Failed to load config.json', err);
+                    throw err;
+                }
+            }
+
             document.getElementById('apiButton').onclick = async function() {
                 const resultElem = document.getElementById('apiResult');
                 resultElem.textContent = 'Calling API...';
                 try {
-                    const response = await fetch('https://ic3anaftmc.execute-api.eu-north-1.amazonaws.com/prod/hello');
+                    const baseUrl = await getApiUrl();
+                    const response = await fetch(baseUrl + '/hello');
                     if (!response.ok) throw new Error('HTTP ' + response.status);
                     const data = await response.json();
                     // Show only the message property if present
