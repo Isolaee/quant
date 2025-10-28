@@ -26,6 +26,7 @@ jobs:
         run: |
           cd cdk
           npm install
+          npm run build
           NODE_ENV=test npm test
       - name: Install and test server
         run: |
