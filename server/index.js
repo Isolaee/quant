@@ -6,6 +6,10 @@ app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from Node server!' });
 });
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+}
+
+module.exports = app;
