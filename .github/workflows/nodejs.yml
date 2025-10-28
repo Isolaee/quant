@@ -18,6 +18,13 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-depth: 0
+    - name: Cache node modules (cdk)
+      uses: actions/cache@v4
+      with:
+        path: cdk/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('cdk/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
     - name: Use Node.js 20.x
       uses: actions/setup-node@v4
       with:
