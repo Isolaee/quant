@@ -39,6 +39,114 @@
 	  aws configure
 	  ```
 
+	Access rights
+	<details>
+
+	> Development was done with full access rights; the following minimum access policy should be sufficient for a CI/deploy principal running `cdk deploy`.
+
+	```json
+	{
+	  "Version": "2012-10-17",
+	  "Statement": [
+	    {
+	      "Sid": "CloudFormationFullAccessToSpecificStack",
+	      "Effect": "Allow",
+	      "Action": [
+	        "cloudformation:CreateStack",
+	        "cloudformation:UpdateStack",
+	        "cloudformation:DeleteStack",
+	        "cloudformation:DescribeStacks",
+	        "cloudformation:DescribeStackEvents",
+	        "cloudformation:GetTemplate",
+	        "cloudformation:ValidateTemplate",
+	        "cloudformation:ListStackResources",
+	        "cloudformation:DescribeStackResource"
+	      ],
+	      "Resource": "arn:aws:cloudformation:<REGION>:<ACCOUNT>:stack/<STACK_NAME>/*"
+	    },
+	    {
+	      "Sid": "S3PutGetForAssets",
+	      "Effect": "Allow",
+	      "Action": [
+	        "s3:PutObject",
+	        "s3:PutObjectAcl",
+	        "s3:GetObject",
+	        "s3:ListBucket"
+	      ],
+	      "Resource": [
+	        "arn:aws:s3:::<BOOTSTRAP_BUCKET>/*",
+	        "arn:aws:s3:::<BUCKET_NAME>/*"
+	      ]
+	    },
+	    {
+	      "Sid": "ECRForAssets",
+	      "Effect": "Allow",
+	      "Action": [
+	        "ecr:GetAuthorizationToken",
+	        "ecr:BatchCheckLayerAvailability",
+	        "ecr:GetDownloadUrlForLayer",
+	        "ecr:BatchGetImage",
+	        "ecr:PutImage",
+	        "ecr:InitiateLayerUpload",
+	        "ecr:UploadLayerPart",
+	        "ecr:CompleteLayerUpload",
+	        "ecr:CreateRepository"
+	      ],
+	      "Resource": "*"
+	    },
+	    {
+	      "Sid": "IAMForCloudFormation",
+	      "Effect": "Allow",
+	      "Action": [
+	        "iam:CreateRole",
+	        "iam:DeleteRole",
+	        "iam:AttachRolePolicy",
+	        "iam:PutRolePolicy",
+	        "iam:PassRole",
+	        "iam:CreatePolicy",
+	        "iam:DeletePolicyVersion",
+	        "iam:GetRole",
+	        "iam:GetPolicy"
+	      ],
+	      "Resource": "*"
+	    },
+	    {
+	      "Sid": "EC2andECSNetworking",
+	      "Effect": "Allow",
+	      "Action": [
+	        "ec2:CreateSecurityGroup",
+	        "ec2:DeleteSecurityGroup",
+	        "ec2:AuthorizeSecurityGroupIngress",
+	        "ec2:RevokeSecurityGroupIngress",
+	        "ec2:CreateVpc",
+	        "ec2:DeleteVpc",
+	        "ec2:Describe*",
+	        "ecs:*",
+	        "elasticloadbalancing:*",
+	        "autoscaling:*",
+	        "apigateway:*",
+	        "acm:RequestCertificate",
+	        "acm:DescribeCertificate"
+	      ],
+	      "Resource": "*"
+	    },
+	    {
+	      "Sid": "LogsForDeployment",
+	      "Effect": "Allow",
+	      "Action": [
+	        "logs:CreateLogGroup",
+	        "logs:CreateLogStream",
+	        "logs:PutLogEvents",
+	        "logs:DescribeLogStreams"
+	      ],
+	      "Resource": "*"
+	    }
+	  ]
+	}
+	```
+
+	</details>
+
 2. **Install AWS CDK (v2):**
 	Install globally using npm:
 	  ```bash
@@ -157,8 +265,6 @@ quant/
 
 This project demonstrates a modern cloud-native architecture using AWS services and best practices for infrastructure as code, containerization, and automated testing.
 
-## Requirements checklist
-
 The project implements the requested features:
 
 - ✅ Simple web application
@@ -201,7 +307,7 @@ The project implements the requested features:
 
 ## Testing
 
-Comprehensive automated testing is implemented for both infrastructure and application code to ensure reliability and maintainability:
+Comprehensive automated testing is implemented for both infrastructure and application code to ensure reliability and maintainability.
 
 #### Infrastructure Tests (CDK)
 - **Tooling:** [Jest](https://jestjs.io/) with AWS CDK assertions
@@ -239,77 +345,77 @@ This architecture provides a scalable, maintainable, and testable foundation for
 - **AWS CDK** streamlines infrastructure as code, enabling repeatable and version-controlled deployments
 - **Node.js/Express** is an industry-standard choice for lightweight, scalable API services
 
-This project leverages a modern cloud-native stack. Below is an analysis of the main technologies used, including their advantages and potential drawbacks:
+This project leverages a modern cloud-native stack. Below is an analysis of the main technologies used, including their advantages and potential drawbacks.
 
 ### AWS CDK (TypeScript)
-**Upsides:**
+**Upsides**
 - Strongly-typed, code-driven infrastructure as code (IaC)
 - Enables version control and repeatable deployments
 - Integrates seamlessly with AWS services
 - Supports testing and validation of infrastructure
 
-**Downsides:**
+**Downsides**
 - Steeper learning curve compared to declarative IaC (e.g., CloudFormation YAML)
 - Tightly coupled to AWS ecosystem
 - Occasional breaking changes between CDK versions
 
 ### Amazon S3 (Static Website Hosting)
-**Upsides:**
+**Upsides**
 - Highly available and cost-effective static hosting
 - Simple deployment and scaling
 - Integrates with CloudFront for CDN
 
-**Downsides:**
+**Downsides**
 - Limited to static content (no server-side logic)
 - Public access configuration can be error-prone
 
 ### Amazon API Gateway
-**Upsides:**
+**Upsides**
 - Fully managed, scalable API endpoint
 - Built-in support for CORS, throttling, and security
 - Easy integration with AWS Lambda or mock integrations
 
-**Downsides:**
+**Downsides**
 - Can be complex to configure for advanced use cases
 - Pricing can increase with high request volumes
 
 ### Amazon ECS (Fargate)
-**Upsides:**
+**Upsides**
 - Serverless container orchestration (no server management)
 - Integrates with VPC, Load Balancer, and IAM
 - Scales automatically with demand
 
-**Downsides:**
+**Downsides**
 - Cold start latency for infrequently used services
 - Debugging and troubleshooting can be more complex than traditional servers
 
 ### Node.js (Express)
-**Upsides:**
+**Upsides**
 - Lightweight, fast, and widely adopted for APIs
 - Large ecosystem of middleware and libraries
 - Easy to containerize and deploy
 
-**Downsides:**
+**Downsides**
 - Single-threaded by default (may require clustering for CPU-bound tasks)
 - Callback-based async can be error-prone if not managed well
 
 ### Jest & Supertest
-**Upsides:**
+**Upsides**
 - Comprehensive testing for both infrastructure and application
 - Fast, easy-to-use, and widely supported
 - Enables TDD and CI/CD integration
 
-**Downsides:**
+**Downsides**
 - May require additional setup for integration or end-to-end tests
 - Mocking AWS resources can be complex
 
 ### Docker
-**Upsides:**
+**Upsides**
 - Consistent environment across development, testing, and production
 - Simplifies deployment and scaling
 - Supported by most cloud providers
 
-**Downsides:**
+**Downsides**
 - Adds complexity to local development if not familiar with containers
 - Requires understanding of container security and best practices
 
@@ -322,5 +428,5 @@ Overall, this stack provides a robust, scalable, and maintainable foundation for
 - Node.js version compatibility is required (v18.14.0 or newer).
 - Advanced API Gateway or ECS configurations may require further customization.
 
-### Use of AI-tools
+## Use of AI-tools
 During the completion of this assignment, I utilized GitHub Copilot as an assistive tool for coding, information retrieval, and README formatting. All solutions and decisions presented are my own and remain my sole responsibility.
