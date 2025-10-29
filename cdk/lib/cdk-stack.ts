@@ -10,6 +10,8 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
 import * as cr from 'aws-cdk-lib/custom-resources';
 
+const WEBSITE_LOCATION = '../FrontEnd/html-website';
+
 export class CDKQuantStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -33,100 +35,14 @@ export class CDKQuantStack extends Stack {
 
     // 2. Deploy static files to S3
     const deploy = new s3deploy.BucketDeployment(this, 'DeployWebsite', {
-      sources: [s3deploy.Source.asset('html-website')],
+      sources: [s3deploy.Source.asset(WEBSITE_LOCATION)],
       destinationBucket: siteBucket,
     });
 
-    // 3. Create a simple API Gateway REST API
-    const api = new apigateway.RestApi(this, 'DefaultApi', {
-      restApiName: 'Default Service',
-      description: 'This service serves as a default API Gateway endpoint.',
-      deployOptions: {
-        stageName: 'prod',
-      },
-    });
-
-    // 4. Add resources and methods
-    const hello = api.root.addResource('hello');
-    hello.addMethod('GET', new apigateway.MockIntegration({
-      integrationResponses: [{
-        statusCode: '200',
-        responseTemplates: { 'application/json': '{ "message": "Hello from API Gateway!" }' },
-        responseParameters: {
-          'method.response.header.Access-Control-Allow-Origin': "'*'",
-          'method.response.header.Access-Control-Allow-Headers': "'Content-Type'",
-          'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET'",
-        },
-      }],
-      passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-      requestTemplates: { 'application/json': '{ "statusCode": 200 }' },
-    }), {
-      methodResponses: [{
-        statusCode: '200',
-        responseParameters: {
-          'method.response.header.Access-Control-Allow-Origin': true,
-          'method.response.header.Access-Control-Allow-Headers': true,
-          'method.response.header.Access-Control-Allow-Methods': true,
-        },
-      }],
-    });
-
-    // Add CORS preflight OPTIONS method
-    hello.addMethod('OPTIONS', new apigateway.MockIntegration({
-      integrationResponses: [{
-        statusCode: '200',
-        responseTemplates: { 'application/json': '"OK"' },
-        responseParameters: {
-          'method.response.header.Access-Control-Allow-Origin': "'*'",
-          'method.response.header.Access-Control-Allow-Headers': "'Content-Type'",
-          'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET'",
-        },
-      }],
-      passthroughBehavior: apigateway.PassthroughBehavior.WHEN_NO_MATCH,
-      requestTemplates: { 'application/json': '{"statusCode": 200}' },
-    }), {
-      methodResponses: [{
-        statusCode: '200',
-        responseParameters: {
-          'method.response.header.Access-Control-Allow-Origin': true,
-          'method.response.header.Access-Control-Allow-Headers': true,
-          'method.response.header.Access-Control-Allow-Methods': true,
-        },
-      }],
-    });
-
-    new CfnOutput(this, 'ApiUrl', { value: api.url ?? 'API URL not available' });
-
-  // Write the API URL to a config.json file in the S3 bucket
-  const writeConfig = new cr.AwsCustomResource(this, 'WriteSiteConfig', {
-      onCreate: {
-        service: 'S3',
-        action: 'putObject',
-        parameters: {
-          Bucket: siteBucket.bucketName,
-          Key: 'config.json',
-          Body: JSON.stringify({ apiUrl: api.url }),
-          ContentType: 'application/json',
-          CacheControl: 'no-cache, no-store, must-revalidate',
-        },
-        physicalResourceId: cr.PhysicalResourceId.of('site-config'),
-      },
-      onUpdate: {
-        service: 'S3',
-        action: 'putObject',
-        parameters: {
-          Bucket: siteBucket.bucketName,
-          Key: 'config.json',
-          Body: JSON.stringify({ apiUrl: api.url }),
-          ContentType: 'application/json',
-          CacheControl: 'no-cache, no-store, must-revalidate',
-        },
-        physicalResourceId: cr.PhysicalResourceId.of('site-config'),
-      },
-      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [siteBucket.bucketArn + '/*'] }),
-    });
-
-    writeConfig.node.addDependency(deploy);
+    // NOTE: API Gateway resources are created later (after the Fargate service)
+    // so we can point the API at the Fargate ALB. The API creation and
+    // S3 write of the config.json happens after the Fargate service is
+    // created further down in this file.
 
     // 5. Create a VPC for ECS
     // CloudFormation parameter for the container port. This allows passing
@@ -161,7 +77,7 @@ export class CDKQuantStack extends Stack {
       cpu: 256,
       desiredCount: 1,
       taskImageOptions: {
-        image: ecs.ContainerImage.fromAsset('../server'),
+        image: ecs.ContainerImage.fromAsset('../BackEnd'),
         // Use the CloudFormation parameter value for container port. We
         // pass it both to the container port mapping and as an environment
         // variable so the app inside the container can read it at runtime.
@@ -196,5 +112,83 @@ export class CDKQuantStack extends Stack {
       value: clusterNameParam.valueAsString,
       description: 'Name of the ECS Cluster',
     });
+
+    // --- Create API Gateway that proxies /hello to the ALB backing the Fargate service ---
+    const api = new apigateway.RestApi(this, 'DefaultApi', {
+      restApiName: 'Default Service',
+      description: 'This API fronts the Node.js Fargate service (proxied to ALB).',
+      deployOptions: { stageName: 'prod' },
+    });
+
+    const hello = api.root.addResource('hello');
+
+    // Proxy GET requests to the ALB that fronts the Fargate service.
+    // The Express app is mounted at /api/hello, so we forward to that path.
+    const albTarget = `http://${fargateService.loadBalancer.loadBalancerDnsName}/api/hello`;
+    hello.addMethod('GET', new apigateway.Integration({
+      type: apigateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'GET',
+      uri: albTarget,
+    }), {
+      methodResponses: [{ statusCode: '200' }],
+    });
+
+    // Keep an OPTIONS mock for CORS preflight so browsers can perform requests.
+    hello.addMethod('OPTIONS', new apigateway.MockIntegration({
+      integrationResponses: [{
+        statusCode: '200',
+        responseTemplates: { 'application/json': '"OK"' },
+        responseParameters: {
+          'method.response.header.Access-Control-Allow-Origin': "'*'",
+          'method.response.header.Access-Control-Allow-Headers': "'Content-Type'",
+          'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET'",
+        },
+      }],
+      passthroughBehavior: apigateway.PassthroughBehavior.WHEN_NO_MATCH,
+      requestTemplates: { 'application/json': '{"statusCode": 200}' },
+    }), {
+      methodResponses: [{
+        statusCode: '200',
+        responseParameters: {
+          'method.response.header.Access-Control-Allow-Origin': true,
+          'method.response.header.Access-Control-Allow-Headers': true,
+          'method.response.header.Access-Control-Allow-Methods': true,
+        },
+      }],
+    });
+
+    new CfnOutput(this, 'ApiUrl', { value: api.url ?? 'API URL not available' });
+
+    // Write the API URL to a config.json file in the S3 bucket so the frontend can read it
+    const writeConfig = new cr.AwsCustomResource(this, 'WriteSiteConfig', {
+      onCreate: {
+        service: 'S3',
+        action: 'putObject',
+        parameters: {
+          Bucket: siteBucket.bucketName,
+          Key: 'config.json',
+          Body: JSON.stringify({ apiUrl: api.url }),
+          ContentType: 'application/json',
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        },
+        physicalResourceId: cr.PhysicalResourceId.of('site-config'),
+      },
+      onUpdate: {
+        service: 'S3',
+        action: 'putObject',
+        parameters: {
+          Bucket: siteBucket.bucketName,
+          Key: 'config.json',
+          Body: JSON.stringify({ apiUrl: api.url }),
+          ContentType: 'application/json',
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        },
+        physicalResourceId: cr.PhysicalResourceId.of('site-config'),
+      },
+      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [siteBucket.bucketArn + '/*'] }),
+    });
+
+    // Ensure the site deployment runs before we write the config
+    writeConfig.node.addDependency(deploy);
   }
 }

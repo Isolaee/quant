@@ -177,6 +177,12 @@
 	```bash
 	cdk bootstrap
 	```
+
+	You can specify User, region and name with following:
+	```
+	cdk bootstrap aws://[User]/[Region] --toolkit-stack-name [StackName]
+	```
+
 2. Deploy the infrastructure and application:
 	```bash
 	cd cdk
@@ -237,6 +243,14 @@ Make sure these are set in your shell or CI/CD environment as needed.
 quant/
 ├── README.md
 ├── package.json
+├── BackEnd/
+│   ├── Dockerfile
+│   ├── index.js
+│   ├── index.test.js
+│   ├── package.json
+│   └── APIs/
+│       └── Hello/
+│           └── HelloAPI.js
 ├── cdk/
 │   ├── cdk.context.json
 │   ├── cdk.json
@@ -246,20 +260,17 @@ quant/
 │   ├── tsconfig.json
 │   ├── bin/
 │   │   └── cdk.ts
-│   ├── html-website/
-│   │   ├── index.html
-│   │   └── error/
-│   │       └── index.html
 │   ├── lib/
 │   │   └── cdk-stack.ts
 │   └── test/
 │       └── cdk.test.ts
-├── server/
-│   ├── Dockerfile
-│   ├── index.js
-│   ├── index.test.js
-│   └── package.json
+└── FrontEnd/
+	└── html-website/
+		├── index.html
+		└── error.html
 ```
+
+> The project's front-end and back-end structures are intentionally modular to promote maintainable development and scalable deployment.
 
 ## Solution overview
 

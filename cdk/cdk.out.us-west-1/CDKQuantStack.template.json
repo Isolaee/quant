@@ -1,0 +1,1868 @@
+{
+ "Resources": {
+  "SiteBucket397A1860": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": false,
+     "BlockPublicPolicy": false,
+     "IgnorePublicAcls": false,
+     "RestrictPublicBuckets": false
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "aws-cdk:cr-owned:35395c5f",
+      "Value": "true"
+     }
+    ],
+    "WebsiteConfiguration": {
+     "ErrorDocument": "error.html",
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/SiteBucket/Resource"
+   }
+  },
+  "SiteBucketPolicy3AC1D0F8": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "SiteBucket397A1860"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "SiteBucket397A1860",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:PutBucketPolicy"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "SiteBucket397A1860",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "SiteBucket397A1860",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/SiteBucket/Policy/Resource"
+   }
+  },
+  "SiteBucketAutoDeleteObjectsCustomResource9585E968": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "SiteBucket397A1860"
+    }
+   },
+   "DependsOn": [
+    "SiteBucketPolicy3AC1D0F8"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/SiteBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-735539227346-eu-north-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "SiteBucket397A1860"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "DeployWebsiteAwsCliLayer17DBC421": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-735539227346-eu-north-1",
+     "S3Key": "c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip"
+    },
+    "Description": "/opt/awscli/aws"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DeployWebsite/AwsCliLayer/Resource",
+    "aws:asset:path": "asset.c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "DeployWebsiteCustomResourceD116527B": {
+   "Type": "Custom::CDKBucketDeployment",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+      "Arn"
+     ]
+    },
+    "SourceBucketNames": [
+     "cdk-hnb659fds-assets-735539227346-eu-north-1"
+    ],
+    "SourceObjectKeys": [
+     "4d306b26256d6332edc35d7179ee08bc85ef46f80e3caf6d0cad28bf4fc77743.zip"
+    ],
+    "DestinationBucketName": {
+     "Ref": "SiteBucket397A1860"
+    },
+    "WaitForDistributionInvalidation": true,
+    "Prune": true,
+    "OutputObjectKeys": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DeployWebsite/CustomResource/Default"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:s3:::cdk-hnb659fds-assets-735539227346-eu-north-1",
+        "arn:aws:s3:::cdk-hnb659fds-assets-735539227346-eu-north-1/*"
+       ]
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "SiteBucket397A1860",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "SiteBucket397A1860",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "Roles": [
+     {
+      "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-735539227346-eu-north-1",
+     "S3Key": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_CA_BUNDLE": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+     }
+    },
+    "Handler": "index.handler",
+    "Layers": [
+     {
+      "Ref": "DeployWebsiteAwsCliLayer17DBC421"
+     }
+    ],
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.13",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
+    "aws:asset:path": "asset.3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CLogGroup817B64E9": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/LogGroup/Resource"
+   }
+  },
+  "ServerVpc1F5D10CE": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/Resource"
+   }
+  },
+  "ServerVpcPublicSubnet1Subnet1BDCF00F": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-north-1a",
+    "CidrBlock": "10.0.0.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet1/Subnet"
+   }
+  },
+  "ServerVpcPublicSubnet1RouteTableF925B71A": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet1/RouteTable"
+   }
+  },
+  "ServerVpcPublicSubnet1RouteTableAssociation56778996": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ServerVpcPublicSubnet1RouteTableF925B71A"
+    },
+    "SubnetId": {
+     "Ref": "ServerVpcPublicSubnet1Subnet1BDCF00F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "ServerVpcPublicSubnet1DefaultRouteC6C2AE32": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "ServerVpcIGWEF925C7B"
+    },
+    "RouteTableId": {
+     "Ref": "ServerVpcPublicSubnet1RouteTableF925B71A"
+    }
+   },
+   "DependsOn": [
+    "ServerVpcVPCGW38C33BA6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "ServerVpcPublicSubnet1EIPDB58CA56": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet1/EIP"
+   }
+  },
+  "ServerVpcPublicSubnet1NATGatewayB6499532": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "ServerVpcPublicSubnet1EIPDB58CA56",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "ServerVpcPublicSubnet1Subnet1BDCF00F"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "ServerVpcPublicSubnet1DefaultRouteC6C2AE32",
+    "ServerVpcPublicSubnet1RouteTableAssociation56778996"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet1/NATGateway"
+   }
+  },
+  "ServerVpcPublicSubnet2Subnet15A3393D": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-north-1b",
+    "CidrBlock": "10.0.64.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet2/Subnet"
+   }
+  },
+  "ServerVpcPublicSubnet2RouteTable9BAA4CA7": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet2/RouteTable"
+   }
+  },
+  "ServerVpcPublicSubnet2RouteTableAssociation53F5E840": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ServerVpcPublicSubnet2RouteTable9BAA4CA7"
+    },
+    "SubnetId": {
+     "Ref": "ServerVpcPublicSubnet2Subnet15A3393D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "ServerVpcPublicSubnet2DefaultRoute42B645B6": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "ServerVpcIGWEF925C7B"
+    },
+    "RouteTableId": {
+     "Ref": "ServerVpcPublicSubnet2RouteTable9BAA4CA7"
+    }
+   },
+   "DependsOn": [
+    "ServerVpcVPCGW38C33BA6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "ServerVpcPublicSubnet2EIP094785EB": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet2/EIP"
+   }
+  },
+  "ServerVpcPublicSubnet2NATGateway8825C3C1": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "ServerVpcPublicSubnet2EIP094785EB",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "ServerVpcPublicSubnet2Subnet15A3393D"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PublicSubnet2"
+     }
+    ]
+   },
+   "DependsOn": [
+    "ServerVpcPublicSubnet2DefaultRoute42B645B6",
+    "ServerVpcPublicSubnet2RouteTableAssociation53F5E840"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PublicSubnet2/NATGateway"
+   }
+  },
+  "ServerVpcPrivateSubnet1SubnetDC1BF684": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-north-1a",
+    "CidrBlock": "10.0.128.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet1/Subnet"
+   }
+  },
+  "ServerVpcPrivateSubnet1RouteTable3DF96C7A": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet1/RouteTable"
+   }
+  },
+  "ServerVpcPrivateSubnet1RouteTableAssociation3FD0D359": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ServerVpcPrivateSubnet1RouteTable3DF96C7A"
+    },
+    "SubnetId": {
+     "Ref": "ServerVpcPrivateSubnet1SubnetDC1BF684"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "ServerVpcPrivateSubnet1DefaultRoute013684E7": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "ServerVpcPublicSubnet1NATGatewayB6499532"
+    },
+    "RouteTableId": {
+     "Ref": "ServerVpcPrivateSubnet1RouteTable3DF96C7A"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "ServerVpcPrivateSubnet2Subnet49493C7D": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-north-1b",
+    "CidrBlock": "10.0.192.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet2/Subnet"
+   }
+  },
+  "ServerVpcPrivateSubnet2RouteTableE94AFD8C": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet2/RouteTable"
+   }
+  },
+  "ServerVpcPrivateSubnet2RouteTableAssociation4564303E": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ServerVpcPrivateSubnet2RouteTableE94AFD8C"
+    },
+    "SubnetId": {
+     "Ref": "ServerVpcPrivateSubnet2Subnet49493C7D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "ServerVpcPrivateSubnet2DefaultRouteCE860F4D": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "ServerVpcPublicSubnet2NATGateway8825C3C1"
+    },
+    "RouteTableId": {
+     "Ref": "ServerVpcPrivateSubnet2RouteTableE94AFD8C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "ServerVpcIGWEF925C7B": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "CDKQuantStack/ServerVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/IGW"
+   }
+  },
+  "ServerVpcVPCGW38C33BA6": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "ServerVpcIGWEF925C7B"
+    },
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/VPCGW"
+   }
+  },
+  "ServerVpcRestrictDefaultSecurityGroupCustomResource85D161EA": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ServerVpc1F5D10CE",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "735539227346"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerVpc/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:eu-north-1:735539227346:security-group/",
+             {
+              "Fn::GetAtt": [
+               "ServerVpc1F5D10CE",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-735539227346-eu-north-1",
+     "S3Key": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200",
+    "aws:asset:property": "Code"
+   }
+  },
+  "ServerClusterB9CEA566": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": {
+     "Ref": "ClusterName"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/ServerCluster/Resource"
+   }
+  },
+  "NodeFargateServiceLB31F02518": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "NodeFargateServiceLBSecurityGroup812F3CFB",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "ServerVpcPublicSubnet1Subnet1BDCF00F"
+     },
+     {
+      "Ref": "ServerVpcPublicSubnet2Subnet15A3393D"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "ServerVpcPublicSubnet1DefaultRouteC6C2AE32",
+    "ServerVpcPublicSubnet1RouteTableAssociation56778996",
+    "ServerVpcPublicSubnet2DefaultRoute42B645B6",
+    "ServerVpcPublicSubnet2RouteTableAssociation53F5E840"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/LB/Resource"
+   }
+  },
+  "NodeFargateServiceLBSecurityGroup812F3CFB": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB CDKQuantStackNodeFargateServiceLB276E25A1",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/LB/SecurityGroup/Resource"
+   }
+  },
+  "NodeFargateServiceLBSecurityGrouptoCDKQuantStackNodeFargateServiceSecurityGroup36323663IndirectPortF4D603CE": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "NodeFargateServiceSecurityGroupCC407270",
+      "GroupId"
+     ]
+    },
+    "FromPort": {
+     "Ref": "Port"
+    },
+    "GroupId": {
+     "Fn::GetAtt": [
+      "NodeFargateServiceLBSecurityGroup812F3CFB",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": {
+     "Ref": "Port"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/LB/SecurityGroup/to CDKQuantStackNodeFargateServiceSecurityGroup36323663:{IndirectPort}"
+   }
+  },
+  "NodeFargateServiceLBPublicListener48094424": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "NodeFargateServiceLBPublicListenerECSGroup4FCDE611"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "NodeFargateServiceLB31F02518"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/LB/PublicListener/Resource"
+   }
+  },
+  "NodeFargateServiceLBPublicListenerECSGroup4FCDE611": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/api/hello",
+    "Matcher": {
+     "HttpCode": "200"
+    },
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "NodeFargateServiceTaskDefTaskRole61C9A6CA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/TaskDef/TaskRole/Resource"
+   }
+  },
+  "NodeFargateServiceTaskDefA3650B6D": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "PORT",
+        "Value": {
+         "Ref": "Port"
+        }
+       },
+       {
+        "Name": "CLUSTER_NAME",
+        "Value": {
+         "Ref": "ClusterName"
+        }
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Sub": "735539227346.dkr.ecr.eu-north-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-735539227346-eu-north-1:2e5ba4cf965a29d122210c6dc72fa8798248757f878fbca7f4751ea752236a04"
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "NodeFargateServiceTaskDefwebLogGroup186C2960"
+        },
+        "awslogs-stream-prefix": "NodeFargateService",
+        "awslogs-region": "eu-north-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": {
+         "Ref": "Port"
+        },
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "NodeFargateServiceTaskDefExecutionRole14B429D1",
+      "Arn"
+     ]
+    },
+    "Family": "CDKQuantStackNodeFargateServiceTaskDef342B5AC4",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "NodeFargateServiceTaskDefTaskRole61C9A6CA",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/TaskDef/Resource"
+   }
+  },
+  "NodeFargateServiceTaskDefwebLogGroup186C2960": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "NodeFargateServiceTaskDefExecutionRole14B429D1": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "NodeFargateServiceTaskDefExecutionRoleDefaultPolicy9427F5B6": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:eu-north-1:735539227346:repository/cdk-hnb659fds-container-assets-735539227346-eu-north-1"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "NodeFargateServiceTaskDefwebLogGroup186C2960",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "NodeFargateServiceTaskDefExecutionRoleDefaultPolicy9427F5B6",
+    "Roles": [
+     {
+      "Ref": "NodeFargateServiceTaskDefExecutionRole14B429D1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "NodeFargateServiceB42BB037": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ServerClusterB9CEA566"
+    },
+    "DeploymentConfiguration": {
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": {
+       "Ref": "Port"
+      },
+      "TargetGroupArn": {
+       "Ref": "NodeFargateServiceLBPublicListenerECSGroup4FCDE611"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "NodeFargateServiceSecurityGroupCC407270",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "ServerVpcPrivateSubnet1SubnetDC1BF684"
+       },
+       {
+        "Ref": "ServerVpcPrivateSubnet2Subnet49493C7D"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "NodeFargateServiceTaskDefA3650B6D"
+    }
+   },
+   "DependsOn": [
+    "NodeFargateServiceLBPublicListenerECSGroup4FCDE611",
+    "NodeFargateServiceLBPublicListener48094424",
+    "NodeFargateServiceTaskDefTaskRole61C9A6CA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/Service/Service"
+   }
+  },
+  "NodeFargateServiceSecurityGroupCC407270": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "CDKQuantStack/NodeFargateService/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ServerVpc1F5D10CE"
+    }
+   },
+   "DependsOn": [
+    "NodeFargateServiceTaskDefTaskRole61C9A6CA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/Service/SecurityGroup/Resource"
+   }
+  },
+  "NodeFargateServiceSecurityGroupfromCDKQuantStackNodeFargateServiceLBSecurityGroupAFE64E7CIndirectPort0BE1A1A8": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": {
+     "Ref": "Port"
+    },
+    "GroupId": {
+     "Fn::GetAtt": [
+      "NodeFargateServiceSecurityGroupCC407270",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "NodeFargateServiceLBSecurityGroup812F3CFB",
+      "GroupId"
+     ]
+    },
+    "ToPort": {
+     "Ref": "Port"
+    }
+   },
+   "DependsOn": [
+    "NodeFargateServiceTaskDefTaskRole61C9A6CA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/NodeFargateService/Service/SecurityGroup/from CDKQuantStackNodeFargateServiceLBSecurityGroupAFE64E7C:{IndirectPort}"
+   }
+  },
+  "DefaultApiB4AF0C9B": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "This API fronts the Node.js Fargate service (proxied to ALB).",
+    "Name": "Default Service"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DefaultApi/Resource"
+   }
+  },
+  "DefaultApiDeployment6D827C6Af38326f0304341ff91357e23ddd8cfaa": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "This API fronts the Node.js Fargate service (proxied to ALB).",
+    "RestApiId": {
+     "Ref": "DefaultApiB4AF0C9B"
+    }
+   },
+   "DependsOn": [
+    "DefaultApihelloGET432509FA",
+    "DefaultApihelloOPTIONSEA5FDDF9",
+    "DefaultApihello838D11BE"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DefaultApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "DefaultApiDeploymentStageprod0360157D": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "DefaultApiDeployment6D827C6Af38326f0304341ff91357e23ddd8cfaa"
+    },
+    "RestApiId": {
+     "Ref": "DefaultApiB4AF0C9B"
+    },
+    "StageName": "prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DefaultApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "DefaultApihello838D11BE": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "DefaultApiB4AF0C9B",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "hello",
+    "RestApiId": {
+     "Ref": "DefaultApiB4AF0C9B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DefaultApi/Default/hello/Resource"
+   }
+  },
+  "DefaultApihelloGET432509FA": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "GET",
+     "Type": "HTTP_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "http://",
+        {
+         "Fn::GetAtt": [
+          "NodeFargateServiceLB31F02518",
+          "DNSName"
+         ]
+        },
+        "/api/hello"
+       ]
+      ]
+     }
+    },
+    "MethodResponses": [
+     {
+      "StatusCode": "200"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "DefaultApihello838D11BE"
+    },
+    "RestApiId": {
+     "Ref": "DefaultApiB4AF0C9B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DefaultApi/Default/hello/GET/Resource"
+   }
+  },
+  "DefaultApihelloOPTIONSEA5FDDF9": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+       },
+       "ResponseTemplates": {
+        "application/json": "\"OK\""
+       },
+       "StatusCode": "200"
+      }
+     ],
+     "PassthroughBehavior": "WHEN_NO_MATCH",
+     "RequestTemplates": {
+      "application/json": "{\"statusCode\": 200}"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "200"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "DefaultApihello838D11BE"
+    },
+    "RestApiId": {
+     "Ref": "DefaultApiB4AF0C9B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/DefaultApi/Default/hello/OPTIONS/Resource"
+   }
+  },
+  "WriteSiteConfig37B3E17F": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"S3\",\"action\":\"putObject\",\"parameters\":{\"Bucket\":\"",
+       {
+        "Ref": "SiteBucket397A1860"
+       },
+       "\",\"Key\":\"config.json\",\"Body\":\"{\\\"apiUrl\\\":\\\"https://",
+       {
+        "Ref": "DefaultApiB4AF0C9B"
+       },
+       ".execute-api.eu-north-1.",
+       {
+        "Ref": "AWS::URLSuffix"
+       },
+       "/",
+       {
+        "Ref": "DefaultApiDeploymentStageprod0360157D"
+       },
+       "/\\\"}\",\"ContentType\":\"application/json\",\"CacheControl\":\"no-cache, no-store, must-revalidate\"},\"physicalResourceId\":{\"id\":\"site-config\"}}"
+      ]
+     ]
+    },
+    "Update": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"S3\",\"action\":\"putObject\",\"parameters\":{\"Bucket\":\"",
+       {
+        "Ref": "SiteBucket397A1860"
+       },
+       "\",\"Key\":\"config.json\",\"Body\":\"{\\\"apiUrl\\\":\\\"https://",
+       {
+        "Ref": "DefaultApiB4AF0C9B"
+       },
+       ".execute-api.eu-north-1.",
+       {
+        "Ref": "AWS::URLSuffix"
+       },
+       "/",
+       {
+        "Ref": "DefaultApiDeploymentStageprod0360157D"
+       },
+       "/\\\"}\",\"ContentType\":\"application/json\",\"CacheControl\":\"no-cache, no-store, must-revalidate\"},\"physicalResourceId\":{\"id\":\"site-config\"}}"
+      ]
+     ]
+    },
+    "InstallLatestAwsSdk": false
+   },
+   "DependsOn": [
+    "DeployWebsiteAwsCliLayer17DBC421",
+    "DeployWebsiteCustomResourceD116527B",
+    "WriteSiteConfigCustomResourcePolicyF6E5A9C9"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/WriteSiteConfig/Resource/Default"
+   }
+  },
+  "WriteSiteConfigCustomResourcePolicyF6E5A9C9": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:PutObject",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "SiteBucket397A1860",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "WriteSiteConfigCustomResourcePolicyF6E5A9C9",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "DependsOn": [
+    "DeployWebsiteAwsCliLayer17DBC421",
+    "DeployWebsiteCustomResourceD116527B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/WriteSiteConfig/CustomResourcePolicy/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-735539227346-eu-north-1",
+     "S3Key": "34a66902956b031404ef497526f619b900363fe7fd65ff02b1de4c30fe10c034.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+    "aws:asset:path": "asset.34a66902956b031404ef497526f619b900363fe7fd65ff02b1de4c30fe10c034",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/9VYS2/bOBD+LdWxYLVtihbY3BwnLQykjWEHPawRGGNyorChSC0fdl3B/33BlyzFSbbdbrDZgyFrZjj65sHhcI7KozfvytcvYGNeUXb7SvBV2c4t0FsCG7NszduyPXH0Fu2iLTTWag1iqgSn2+K4YGisVtuCFOCsOkWBFi9WX5FaUxxb7ZAUjVsJTmcIbEQpmo6+EoreTgMzM4qXBSk2uDLc4kQy/HaqqKtR2iHrTGulB6zdFRlfy4iSxEeEuGiLVXg9EIv8JHwCBhdXO2LeLluGjVBbr7qMzNOOQMAYtKYc+ceOCKhXDMp2fC3PYYv6C2rDlSRzLiuBVskPTlLLlVy0hXOcJSuElzXF8aJ4WVyRAuWaayV7Zka9U6cbZTDRLK9RuSyhlciMGmult3P+PROwucEaNYi5VRoq7LHWDd3/m7uVRJu9fs0Fmq2xWGcQqvqolWvSK1Usa7kByQTqDMVJjy36l7QFMPYJLTCwEE0kPtxX97O8Bzxn4J1D4w9sfNAbd1BfpwB8hvoHfPCENl6RXi78bQL8n4J91kc/CCowdt631NOeVSRDNchx2REOddnOlMBFW4AxrkZ2si2O26LRXFLegBhRqlwXpSjjF4yChuSVogYJFbJQYDh669sBbTvSSTa76VJN8ydyZV20iWst0JuJFFxix+s8/Cjzcb3/2MBfWx1j3EXxP3TAE7nn5+P/oA0hP71+kg4z/9m84FLNwma544tDMmNzCxb9BjUD8w/JT63/QbLp0fZZ8TN6fxxz8Gp06I4IVZmyPU+1xtfm9HeQoRotyl6I7xMLarOiHUF6VLZfGhpi/2303fSkvkzHJDY+sWr5erMGLmDFBbfbP5TslbhJPhgpZ/rE90z5LIAmKpk0F/IcnKQ3ubXizfr9+I44GMMrOWnW70eMaTTmQo41wsCqZ4EiRfkz2I9gcQODLf0cAD4PFA+6KaRYTKxYP5zFS1gJ3NP3tJExivKguBP2f84mU//YaydTzddg8V/P2GsQ5hnE4tdgPB8kzwRGzMKJtKgldjkUa196G4XaHK5Vc6ROc7vNRXjf2TE0VPOmU00KEEJtRkJcOLtSTrKENG2Hiaw8oJkL9b4tKMh4skZK3HFUSYnhyM79opP8T4fJQSGenhwU51PnrK84HJRRqOv8M+h7kfQWJK1xm/YNPyDETx6Qk2Z/xpiyHQtnLOqB12ik3TmckiT5ALoCv//N7Slec8nDtSR17nd/YeVQlIyVtMAl6h4tKZ2jXnOKi7wyvQesywaszwdTjppGcBoS5lwBOwEBkiIb6iAowFhOhQK2ChJcVuujsr1/tV70EfcZpL+AG4tyLzwwMzP7Cy5BV2i7+PRevU16mSYCp4reop7UUGEYDnheOcNGGW6V3sb5AoGGVzH5y3aGxo4aHmYq4V/vZnOY9XEocdGkpA0dU9Vro1OvGDWR/cRi0d63hRqer0PoA7kXH7Rfl+pcVZyC8Pti0Db/KD2A6o1P5h50gJRJCccda2LqeBqZoVFOUwweDIHKlEVbNKD3OhqwN1PQ/UlPFiWf0N4oFn0dKPlyaG0TeYnApcVKQ89Zau/zOkjO0DRKmtTY+87VmXG+b+6udvspQE/4AVny9Ih8kCN7ChpqtOFC/pNQH1MSPB1V7HZk7IxVdRej+7ZZF5Wh7FSrNWeofaRJ2EQ+A7is/JoLZxtn08RtGQYoS9gYKng52pix4GHS4JOOPPrtDj6h4ePL7H4T9AwA7YhUDMuv5rf10evyze/luxdfDeev0gyhnMXnX1/8HSBAFQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CDKQuantStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "Bucket": {
+   "Value": {
+    "Ref": "SiteBucket397A1860"
+   }
+  },
+  "WebsiteURL": {
+   "Value": {
+    "Fn::GetAtt": [
+     "SiteBucket397A1860",
+     "WebsiteURL"
+    ]
+   }
+  },
+  "NodeFargateServiceLoadBalancerDNS3BD08BD7": {
+   "Value": {
+    "Fn::GetAtt": [
+     "NodeFargateServiceLB31F02518",
+     "DNSName"
+    ]
+   }
+  },
+  "NodeFargateServiceServiceURLE6F1CAA2": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "NodeFargateServiceLB31F02518",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "NodeServerUrl": {
+   "Description": "URL of the Node.js server (Fargate behind ALB)",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "NodeFargateServiceLB31F02518",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "PortOutput": {
+   "Description": "Port the Node.js container listens on",
+   "Value": {
+    "Ref": "Port"
+   }
+  },
+  "ClusterNameOutput": {
+   "Description": "Name of the ECS Cluster",
+   "Value": {
+    "Ref": "ClusterName"
+   }
+  },
+  "DefaultApiEndpointB0E75779": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "DefaultApiB4AF0C9B"
+      },
+      ".execute-api.eu-north-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "DefaultApiDeploymentStageprod0360157D"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "ApiUrl": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "DefaultApiB4AF0C9B"
+      },
+      ".execute-api.eu-north-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "DefaultApiDeploymentStageprod0360157D"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "Port": {
+   "Type": "Number",
+   "Default": 3000,
+   "Description": "Port on which the Node.js container listens"
+  },
+  "ClusterName": {
+   "Type": "String",
+   "Default": "QuantServerCluster",
+   "Description": "Name of the ECS Cluster"
+  },
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

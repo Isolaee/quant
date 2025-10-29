@@ -13,5 +13,5 @@ new CDKQuantStack(app, stackId, {
   // Also set the physical CloudFormation stack name so `cdk deploy` can target it
   // consistently when provided via context/env.
   stackName: stackId,
-  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'eu-north-1' },
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
 });
