@@ -438,6 +438,8 @@ Overall, this stack provides a robust, scalable, and maintainable foundation for
 - The project is tightly coupled to AWS services and may not be easily portable to other cloud providers.
 - Node.js version compatibility is required (v18.14.0 or newer).
 - Advanced API Gateway or ECS configurations may require further customization.
+- Use of Fargate and possible coldboots may affect user experience in form of longer waiting times.
+- Solution is developed in AWS region "eu-north-1", and there might be some artifacts reflecting that.
 
 ## Use of AI-tools
 During the completion of this assignment, I utilized GitHub Copilot as an assistive tool for coding, information retrieval, and README formatting. All solutions and decisions presented are my own and remain my sole responsibility.
