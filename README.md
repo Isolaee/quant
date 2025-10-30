@@ -8,7 +8,7 @@
 - [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) (v2)
 - [Docker](https://www.docker.com/)
 
-## Installation
+## Getting Started
 
 > **Note:** This project requires Node.js v18.14.0 or newer and npm v9 or newer. Using older versions may result in dependency errors, especially with Jest and AWS CDK.
 
