@@ -183,6 +183,8 @@
 	cdk bootstrap aws://[User]/[Region] --toolkit-stack-name [StackName]
 	```
 
+	> Remember to open your Docker engine and have "docker" in path.
+
 2. Deploy the infrastructure and application:
 	```bash
 	cd cdk
