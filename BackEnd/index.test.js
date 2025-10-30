@@ -5,7 +5,7 @@ const app = require('./index');
 describe('Node server', () => {
   let server;
   beforeAll((done) => {
-    server = app.listen(4000, done);
+    server = app.listen(3000, done);
   });
   afterAll((done) => {
     server.close(done);

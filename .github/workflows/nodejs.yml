@@ -46,3 +46,30 @@ jobs:
       run: npm ci
     - name: Run tests (cdk)
       run: npx jest --config jest.config.js --runInBand
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BackEnd
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+        fetch-depth: 0
+    - name: Cache node modules (backend)
+      uses: actions/cache@v4
+      with:
+        path: BackEnd/node_modules
+        key: ${{ runner.os }}-node-backend-${{ hashFiles('BackEnd/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+    - name: Install dependencies (backend)
+      run: npm ci
+    - name: Run tests (backend)
+      run: npm test
