@@ -16,6 +16,7 @@
         <button id="apiButton">Call API</button>
         <pre id="apiResult" style="margin-top:1em; background:#eee; padding:1em;"></pre>
         <script>
+            //  Fetch config.json to get the dynamic API URL
             async function getApiUrl() {
                 try {
                     const resp = await fetch('/config.json', { cache: 'no-cache' });
@@ -29,6 +30,7 @@
                 }
             }
 
+            // Button click handler to call the API
             document.getElementById('apiButton').onclick = async function() {
                 const resultElem = document.getElementById('apiResult');
                 resultElem.textContent = 'Calling API...';
