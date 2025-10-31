@@ -317,6 +317,7 @@ The project implements the requested features:
 
 - Express server in `server/index.js` exposes a `/api/hello` endpoint returning a JSON message
 - Unit tests (`server/index.test.js`) validate endpoint responses using Supertest and Jest
+The backend leverages Docker and a Dockerfile to ensure a reproducible containerized environment, enabling streamlined deployment and operational consistency.
 
 ## Testing
 
