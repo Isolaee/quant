@@ -45,7 +45,7 @@ jobs:
     - name: Install dependencies (cdk)
       run: npm ci
     - name: Run tests (cdk)
-      run: npx jest --config jest.config.js --runInBand
+      run: npx jest --config jest.config.ts --runInBand
 
   backend:
     runs-on: ubuntu-latest
