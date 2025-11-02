@@ -433,6 +433,8 @@ This project leverages a modern cloud-native stack. Below is an analysis of the 
 - Adds complexity to local development if not familiar with containers
 - Requires understanding of container security and best practices
 
+### Conclusion
+
 Overall, this stack provides a robust, scalable, and maintainable foundation for cloud-native applications, with trade-offs primarily around complexity and AWS lock-in.
 
 
