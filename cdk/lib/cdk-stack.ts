@@ -57,7 +57,7 @@ export class CDKQuantStack extends Stack {
     // CloudFormation parameter for the ECS cluster name
     const clusterNameParam = new CfnParameter(this, 'ClusterName', {
       type: 'String',
-      default: 'QuantServerCluster',
+      default: `QuantServerCluster-${id}`,
       description: 'Name of the ECS Cluster',
     });
 
