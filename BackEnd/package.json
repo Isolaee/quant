@@ -1,9 +1,12 @@
 {
   "name": "quant-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node index.ts",
     "test": "jest --runInBand"
   },
   "dependencies": {

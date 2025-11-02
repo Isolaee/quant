@@ -1,12 +1,15 @@
-const request = require('supertest');
-const express = require('express');
-const app = require('./index');
+import request from 'supertest';
+import express, { Application } from 'express';
+import app from './index';
+import { Server } from 'http';
 
 describe('Node server', () => {
-  let server;
+  let server: Server;
+  
   beforeAll((done) => {
     server = app.listen(3000, done);
   });
+  
   afterAll((done) => {
     server.close(done);
   });
